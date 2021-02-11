@@ -19,7 +19,7 @@ async function main () {
         await say(`Removed\n• ${removed}\n from your todo list`)
       })
 
-      app.command('/wicsprojects', async ({ command, ack, say }) => {
+      app.command('/projects', async ({ command, ack, say }) => {
         await ack()
 
         let currentProjects = JSON.parse(await database.get("projects")) || [] // Get the user's array, and if the user has never used this todo list before, use an empty array
@@ -71,7 +71,7 @@ async function main () {
             
         })
 
-      app.command('/wicsaddproject', async ({ command, ack, say }) => {
+      app.command('/addproject', async ({ command, ack, say }) => {
         await ack()
         let currentProjects = JSON.parse(await database.get("projects")) || [] // Same as previous command, get the array, if it doesn't exist, use an empty one
         currentProjects.push({
@@ -102,14 +102,14 @@ async function main () {
         })
     })
 
-    app.command('/wicsclearprojects', async ({ command, ack, say }) => {
+    app.command('/clearprojects', async ({ command, ack, say }) => {
         await ack()
         await database.empty("projects")
         // Set the array in the database
         await say(`Cleared our project list.`)
       })
 
-    app.command('/wicscleanprojects', async ({ command, ack, say }) => {
+    app.command('/cleanprojects', async ({ command, ack, say }) => {
       await ack()
       let currentProjects = JSON.parse(await database.get("projects")) || []
       let result = []
