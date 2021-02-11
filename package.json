@@ -1,0 +1,24 @@
+{
+  "name": "project-bot",
+  "version": "1.0.0",
+  "description": "A Slack bot I made for my Women in Computer Science club to store mini project ideas and get inspired",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/addybug/project-bot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/addybug/project-bot/issues"
+  },
+  "homepage": "https://github.com/addybug/project-bot#readme",
+  "dependencies": {
+    "@replit/database": "^2.0.0",
+    "@slack/bolt": "^3.2.0"
+  }
+}
