@@ -10,13 +10,15 @@ const app = new App({
 async function main () {
     await app.start(process.env.PORT || 3000)
 
-    app.command('/todolistremove', async ({ command, ack, say }) => {
+    app.command('/removeproject', async ({ command, ack, say }) => {
         await ack()
-        let currentUserTodo = JSON.parse(await database.get(command.user_id)) || [] // Same as previous command
-        let removed = currentUserTodo[command.text - 1] // Store the value that will be removed so we can show "Removed xxxxxxxx from your todo list" later
-        currentUserTodo.splice(command.text - 1, 1) // Splice the array and remove the item at the provided item number from todo list
-        await database.set(command.user_id, JSON.stringify(currentUserTodo)) // Set the array in the database
-        await say(`Removed\n• ${removed}\n from your todo list`)
+        let currentProjects= JSON.parse(await database.get(command.user_id)) || []  
+        let result = []
+        currentProjects.forEach((item) => {
+          if(item["project"] != command.text) { result.push(item) }
+        })
+        await database.set("projects", JSON.stringify(result)) 
+        await say(`Removed\n• ${command.text}\n from your project list`)
       })
 
       app.command('/projects', async ({ command, ack, say }) => {
@@ -85,7 +87,7 @@ async function main () {
               "type": "section",
               "text": {
                 "type": "mrkdwn",
-                "text": ":memo: *Thank you for your project submission!* :memo:"
+                "text": "*Thank you for your project submission!* :memo:"
               }
             },
             {
@@ -102,13 +104,15 @@ async function main () {
         })
     })
 
+    //Slash command to clear entire project list
     app.command('/clearprojects', async ({ command, ack, say }) => {
         await ack()
         await database.empty("projects")
         // Set the array in the database
         await say(`Cleared our project list.`)
       })
-
+    
+    //Slash command to delete duplicate entries
     app.command('/cleanprojects', async ({ command, ack, say }) => {
       await ack()
       let currentProjects = JSON.parse(await database.get("projects")) || []
@@ -122,7 +126,7 @@ async function main () {
         })
         if(!dup) { result.push(item) }
       })
-      await database.set("projects", JSON.stringify(result)) // Set the array in the database
+      await database.set("projects", JSON.stringify(result)) 
       await say(`Cleaned project list.`)
     })
 
