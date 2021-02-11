@@ -12,13 +12,13 @@ async function main () {
 
     app.command('/removeproject', async ({ command, ack, say }) => {
         await ack()
-        let currentProjects= JSON.parse(await database.get(command.user_id)) || []  
+        let currentProjects= JSON.parse(await database.get("projects")) || []  
         let result = []
         currentProjects.forEach((item) => {
-          if(item["project"] != command.text) { result.push(item) }
+          if(item["project"].toLowerCase() != command.text.toLowerCase()) { result.push(item) }
         })
         await database.set("projects", JSON.stringify(result)) 
-        await say(`Removed\n• ${command.text}\n from your project list`)
+        await say(`Removed *${command.text}* from your project list`)
       })
 
       app.command('/projects', async ({ command, ack, say }) => {
