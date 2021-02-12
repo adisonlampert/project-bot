@@ -142,7 +142,7 @@ async function main () {
             response += `\n:purple_heart: Completed ${project["project"]} on ${project["date"]}`
           }
           else {
-            response += `\n:black_heart: ${project["project"]}`
+            response += `\n:black_heart: Completed *${project["project"]}* on *${project["date"]}*`
           }
         })
       
