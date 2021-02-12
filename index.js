@@ -219,6 +219,14 @@ async function main () {
         })
     })
 
+    //Slash command to clear entire project list
+    app.command('/clearcompleted', async ({ command, ack, say }) => {
+        await ack()
+        await database.empty(command.user_id)
+        // Set the array in the database
+        await say(`Cleared your completed project list.`)
+      })
+
     console.log('⚡️ Server ready')
 }
 

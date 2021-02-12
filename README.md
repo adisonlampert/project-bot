@@ -8,7 +8,7 @@ This is a Slack bot I made using Node.js, Bolt.js, and Repl.it for my Women in C
 `/cleanprojects` Deletes duplicate entries. <br />
 `/completed` Lists projects user has completed and date. <br />
 `/addcompleted <Project Name>` User can add completed projects to personal list <br />
+`/clearcompleted` Clears user's completed project list. <br />
 ### To do
 - Limit editing of list to admins
 - Project roulette
-- Personal list of completed tasks
