@@ -6,6 +6,8 @@ This is a Slack bot I made using Node.js, Bolt.js, and Repl.it for my Women in C
 `/removeproject <Project Name>` Allows user to remove a project from the list. <br />
 `/clearprojects` Clears project list. <br />
 `/cleanprojects` Deletes duplicate entries. <br />
+`/completed` Lists projects user has completed and date. <br />
+`/addcompleted` User can add completed projects to personal list <br />
 ### To do
 - Limit editing of list to admins
 - Project roulette
