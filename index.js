@@ -133,11 +133,11 @@ async function main () {
     app.command('/completed', async ({ command, ack, say }) => {
         await ack()
 
-        let currentProjects = JSON.parse(await database.get(command.user_id)) || [] // Get the user's array, and if the user has never used this todo list before, use an empty array
+        let currentProgress = JSON.parse(await database.get(command.user_id)) || [] // Get the user's array, and if the user has never used this todo list before, use an empty array
 
         // Nicely format the array as a list with numbers
         let response = ""
-        currentProjects.forEach((project, index) => {
+        currentProgress.forEach((project, index) => {
           if(index % 2 == 1){
             response += `\n:purple_heart: Completed ${project["project"]} on ${project["date"]}`
           }
