@@ -130,6 +130,57 @@ async function main () {
       await say(`Cleaned project list.`)
     })
 
+    app.command('/completed', async ({ command, ack, say }) => {
+        await ack()
+
+        let currentProjects = JSON.parse(await database.get(command.user_id)) || [] // Get the user's array, and if the user has never used this todo list before, use an empty array
+
+        // Nicely format the array as a list with numbers
+        let response = ""
+        currentProjects.forEach((project, index) => {
+          if(index % 2 == 1){
+            response += `\n:purple_heart: Completed ${project["project"]} on ${project["date"]}`
+          }
+          else {
+            response += `\n:black_heart: ${project["project"]}`
+          }
+        })
+      
+          if (response) {
+              await say({
+                blocks: [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Your Completed Project List"
+                  }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": `This is a list of the projects you've completed.`
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": response
+                  }
+                }
+              ]
+            })
+          } else {
+              await say(`Your completed project list is currently empty!`)
+          }
+            
+        })
+
     console.log('⚡️ Server ready')
 }
 
