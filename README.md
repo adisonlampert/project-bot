@@ -9,3 +9,4 @@ This is a Slack bot I made using Node.js, Bolt.js, and Repl.it for my Women in C
 ### To do
 - Limit editing of list to admins
 - Project roulette
+- Personal list of completed tasks
