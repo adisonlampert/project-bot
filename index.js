@@ -13,8 +13,11 @@ async function main () {
     //Slash command to list all projects
     app.command('/projects', async ({ command, ack, say }) => {
         await ack()
+        // Gets current projects or sets currentProjects to an empty array if there is nothing
         let currentProjects = JSON.parse(await database.get("projects")) || [] 
+
         let response = ""
+        // Loops through current projects and formats them into a bulleted list
         currentProjects.forEach((project, index) => {
           if(index % 2 == 1){
             response += `\n:purple_heart: ${project["project"]}`
@@ -58,6 +61,8 @@ async function main () {
         }   
       })
 
+    //Slash command to remove project
+    //Only available for admins
     app.command('/removeproject', async ({ command, ack, say }) => {
         await ack()
         let currentProjects= JSON.parse(await database.get("projects")) || []  
@@ -81,21 +86,27 @@ async function main () {
         }       
       })
 
+      //Slash command to add project
       app.command('/addproject', async ({ command, ack, say }) => {
         await ack()
-        let currentProjects = JSON.parse(await database.get("projects")) || [] // Same as previous command, get the array, if it doesn't exist, use an empty one
+        let currentProjects = JSON.parse(await database.get("projects")) || [] 
+
+        // Checks if the project has already been added
         let dup = false
         currentProjects.forEach((item) => {
           if(command.text.toLowerCase().indexOf(item["project"].toLowerCase()) != -1){
             dup = true
           }
         })
+
+        // If the project has not been added already, pushes new project to the list of projects
         if(!dup) { 
           currentProjects.push({
             "project": command.text,
-            "date": command.user_id
-          }) // Add the new item to the array
+            "user": command.user_id
+          }) 
           await database.set("projects", JSON.stringify(currentProjects)) // Set the array in the database
+
           await say({
             blocks: [
               {
@@ -124,97 +135,53 @@ async function main () {
     })
 
     //Slash command to clear entire project list
+    //Admins only
     app.command('/clearprojects', async ({ command, ack, say, client }) => {
-        await ack()
-        let adminBol = false
-        let userList = await client.users.list()
-        userList.members.forEach((user) => {
-          if(user.id == command.user_id && user.is_admin){
-            adminBol = true
-          }
-        })
-        if(adminBol){
-          await database.delete("projects")
-          await say(`Cleared our project list.`)  
+      await ack()
+
+      //Checks if user is an admin
+      let adminBol = false
+      let userList = await client.users.list()
+      userList.members.forEach((user) => {
+        if(user.id == command.user_id && user.is_admin){
+          adminBol = true
         }
-        else {
-          await say(`Ask an admin to do this.`)
-        }       
       })
 
+      //Only deletes if user is an admin
+      if(adminBol){
+        await database.delete("projects")
+        await say(`Cleared our project list.`)  
+      }
+      else {
+        await say(`Ask an admin to do this.`)
+      }       
+    })
+
+    //Slash command to get list of user's completed projects
     app.command('/completed', async ({ command, ack, say }) => {
-        await ack()
+      await ack()
+      let currentProgress = JSON.parse(await database.get(command.user_id)) || [] 
 
-        let currentProgress = JSON.parse(await database.get(command.user_id)) || [] // Get the user's array, and if the user has never used this todo list before, use an empty array
-
-        // Nicely format the array as a list with numbers
-        let response = ""
-        currentProgress.forEach((project, index) => {
-          if(index % 2 == 1){
-            response += `\n:purple_heart: Completed ${project["project"]} on ${project["date"]}`
-          }
-          else {
-            response += `\n:black_heart: Completed *${project["project"]}* on *${project["date"]}*`
-          }
-        })
-      
-          if (response) {
-              await say({
-                blocks: [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "Your Completed Project List"
-                  }
-                },
-                {
-                  "type": "divider"
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": `This is a list of the projects you've completed.`
-                  }
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": response
-                  }
-                }
-              ]
-            })
-          } else {
-              await say(`Your completed project list is currently empty!`)
-          }
-            
-        })
-
-        app.command('/addcompleted', async ({ command, ack, say }) => {
-        await ack()
-        let currentProgress = JSON.parse(await database.get(command.user_id)) || [] 
-
-        let today = new Date();
-        let dd = String(today.getDate()).padStart(2, '0');
-        let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-        let yyyy = today.getFullYear();
-        today = mm + '/' + dd + '/' + yyyy;
-
-        currentProgress.push({
-          "project": command.text,
-          "date": today
-        }) // Add the new item to the array
-         await database.set(command.user_id, JSON.stringify(currentProgress)) // Set the array in the database
-        await say({
-          blocks: [
+      // Nicely format the array 
+      let response = ""
+      currentProgress.forEach((project, index) => {
+        if(index % 2 == 1){
+          response += `\n:purple_heart: Completed ${project["project"]} on ${project["date"]}`
+        }
+        else {
+          response += `\n:black_heart: Completed *${project["project"]}* on *${project["date"]}*`
+        }
+      })
+    
+      if (response) {
+          await say({
+            blocks: [
             {
               "type": "section",
               "text": {
                 "type": "mrkdwn",
-                "text": "*Nice job!* :facepunch:"
+                "text": "Your Completed Project List"
               }
             },
             {
@@ -224,82 +191,140 @@ async function main () {
               "type": "section",
               "text": {
                 "type": "mrkdwn",
-                "text": `Great work, <@${command.user_id}>! I've added *${command.text}* to your list of completed projects.`
+                "text": `This is a list of the projects you've completed.`
+              }
+            },
+            {
+              "type": "section",
+              "text": {
+                "type": "mrkdwn",
+                "text": response
               }
             }
           ]
         })
+      } 
+      else {
+        await say(`Your completed project list is currently empty!`)
+      }   
     })
 
-    //Slash command to clear entire project list
-    app.command('/clearcompleted', async ({ ack, body, client }) => {
-        await ack()
-        try {
-        const result = await client.views.open({
-          // Pass a valid trigger_id within 3 seconds of receiving it
-          trigger_id: body.trigger_id,
-          // View payload
-          view: {
-            type: 'modal',
-            "callback_id": "clear-conf",
-            title: {
-              type: 'plain_text',
-              text: 'Confirmation'
-            },
-            submit: {
-              "type": "plain_text",
-              "text": "Submit"
-            },
-            blocks: [
-              {
-                "type": "input",
-                "block_id":"block_1",
-                "element": {
-                  "type": "static_select",
-                  "action_id": "static_select-action",
-                  "placeholder": {
-                    "type": "plain_text",
-                    "text": "Select an item",
-                    "emoji": true
-                  },
-                  "options": [
-                    {
-                      "text": {
-                        "type": "plain_text",
-                        "text": "Yes",
-                        "emoji": true
-                      },
-                      "value": "value-0"
-                    },
-                    {
-                      "text": {
-                        "type": "plain_text",
-                        "text": "No",
-                        "emoji": true
-                      },
-                      "value": "value-1"
-                    }
-                  ],
-                },
-                "label": {
-                  "type": "plain_text",
-                  "text": "Are you sure you want to delete your completed list?",
-                  "emoji": true
-                }
-              }
-            ]
-          }
-         })
-        }
-        catch (error) {
-          console.error(error);
-        }
-      })
+    //Slash command to add completed project to user's list
+    app.command('/addcompleted', async ({ command, ack, say }) => {
+      await ack()
+      let currentProgress = JSON.parse(await database.get(command.user_id)) || [] 
+      
+      // Gets today's date and formats it
+      let today = new Date();
+      let dd = String(today.getDate()).padStart(2, '0');
+      let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+      let yyyy = today.getFullYear();
+      today = mm + '/' + dd + '/' + yyyy;
 
+      //Pushes project and date to user's list
+      currentProgress.push({
+        "project": command.text,
+        "date": today
+      }) 
+      await database.set(command.user_id, JSON.stringify(currentProgress)) // Set the array in the database
+     
+      await say({
+        blocks: [
+          {
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": "*Nice job!* :facepunch:"
+            }
+          },
+          {
+            "type": "divider"
+          },
+          {
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": `Great work, <@${command.user_id}>! I've added *${command.text}* to your list of completed projects.`
+            }
+          }
+        ]
+      })
+    })
+
+    //Slash command to clear entire user's completed project list
+    app.command('/clearcompleted', async ({ ack, body, client }) => {
+      await ack()
+      try {
+      const result = await client.views.open({
+
+        // Pass a valid trigger_id within 3 seconds of receiving it
+        trigger_id: body.trigger_id,
+        // View payload
+        view: {
+          type: 'modal',
+          "callback_id": "clear-conf",
+          title: {
+            type: 'plain_text',
+            text: 'Confirmation'
+          },
+          submit: {
+            "type": "plain_text",
+            "text": "Submit"
+          },
+          blocks: [
+            {
+              "type": "input",
+              "block_id":"block_1",
+              "element": {
+                "type": "static_select",
+                "action_id": "static_select-action",
+                "placeholder": {
+                  "type": "plain_text",
+                  "text": "Select an item",
+                  "emoji": true
+                },
+                "options": [
+                  {
+                    "text": {
+                      "type": "plain_text",
+                      "text": "Yes",
+                      "emoji": true
+                    },
+                    "value": "value-0"
+                  },
+                  {
+                    "text": {
+                      "type": "plain_text",
+                      "text": "No",
+                      "emoji": true
+                    },
+                    "value": "value-1"
+                  }
+                ],
+              },
+              "label": {
+                "type": "plain_text",
+                "text": "Are you sure you want to delete your completed list?",
+                "emoji": true
+              }
+            }
+          ]
+        }
+        })
+      }
+      catch (error) {
+        console.error(error);
+      }
+    })
+    
+    //Runs when user interacts with modal above
     app.view("clear-conf", async ({ body, view, ack, client, payload }) => {
+
       // Acknowledge the action
       await ack()
+      // Receives the user's decision
       const val = view['state']['values']['block_1']['static_select-action']['selected_option']['text']['text']
+
       if(val == 'Yes') {
         await client.views.open({
             trigger_id: body.trigger_id,
@@ -361,9 +386,10 @@ async function main () {
       }
     })
 
+    //Slash command to delete a completed project
     app.command('/removecompleted', async ({ command, ack, say, client, body }) => {
-        await ack()
-        try {
+      await ack()
+      try {
         const result = await client.views.open({
           // Pass a valid trigger_id within 3 seconds of receiving it
           trigger_id: body.trigger_id,
@@ -425,6 +451,7 @@ async function main () {
       }    
     })
     
+    //Runs when user interacts with modal above
     app.view("delete-conf", async ({ body, view, ack, client, payload }) => {
       // Acknowledge the action
       await ack()
@@ -457,6 +484,8 @@ async function main () {
               ]
             }
         })
+
+        //Removes project from list
         let currentProjects= JSON.parse(await database.get(body['user']['id'])) || []  
         let result = []
         currentProjects.forEach((item) => {
@@ -497,6 +526,7 @@ async function main () {
       }
     })
 
+    //Slash command to choose a random project from the list
     app.command('/projectroulette', async ({ command, ack, say }) => {
       await ack()
       let currentProjects = JSON.parse(await database.get("projects")) || []
@@ -514,6 +544,7 @@ async function main () {
     console.log('⚡️ Server ready')
 }
 
+//Function that delays the message time
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }

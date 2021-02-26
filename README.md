@@ -10,5 +10,4 @@ This is a Slack bot I made using Node.js, Bolt.js, and Repl.it for my Women in C
 `/removecompleted <Project Name>` User can add completed projects to personal list <br />
 `/clearcompleted` Clears user's completed project list. <br />
 ### To do
-- Limit editing of list to admins
-- Project roulette
+- Nothing atm
